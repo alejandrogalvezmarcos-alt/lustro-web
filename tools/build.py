@@ -169,9 +169,9 @@ def photo_of(ident):
 def team_block(people):
     """Con fotos de todos: fichas con retrato. Si falta alguna: directorio tipográfico."""
     if all(photo_of(t[0]) for t in people):
-        return '<div class="team">%s</div>' % "".join(
-            '<article class="member reveal">%s<h3>%s</h3><p class="role">%s</p>%s</article>' % (
-                img(photo_of(t[0]), t[1], "", 800, 1000), t[1], t[2], '<p class="col">N.º col. %s</p>' % t[3] if t[3] else "") for t in people)
+        return '<div class="team%s">%s</div>' % (" few" if len(people) < 4 else "", "".join(
+            '<article class="member reveal"><span class="ph">%s</span><h3>%s</h3><p class="role">%s</p>%s</article>' % (
+                img(photo_of(t[0]), t[1], "", 800, 1000), t[1], t[2], '<p class="col">N.º col. %s</p>' % t[3] if t[3] else "") for t in people))
     return '<ul class="people">%s</ul>' % "".join(
         '<li class="reveal"><h3>%s</h3><p>%s</p>%s</li>' % (t[1], t[2], '<small>N.º col. %s</small>' % t[3] if t[3] else "") for t in people)
 

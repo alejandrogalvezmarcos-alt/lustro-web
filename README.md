@@ -21,6 +21,7 @@ node tools/test.js       # pruebas de citas, permisos y calculadora
 - Validación de todos los textos médicos por la dirección médica.
 - Revisión legal de aviso legal, privacidad y cookies (hay campos «pendiente»).
 - Confirmar: duración de las citas, festivos, lista de tratamientos por área y quién atiende salud hormonal y fisioterapia.
+- Confirmar por escrito el permiso de uso de los retratos del equipo (`assets/img/equipo/`, tomados de la web de la clínica).
 - Conectar la base de datos (hoy las reservas están en modo demostración).
 - Conectar el gestor de cookies y, si hay campaña, las etiquetas de medición.
 - Quitar `noindex`: `INDEXABLE = True` en `tools/build.py`.
