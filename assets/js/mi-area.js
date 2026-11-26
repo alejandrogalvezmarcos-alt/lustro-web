@@ -24,7 +24,7 @@
     root.innerHTML = U.demoRibbon(db) + '<div class="bar"><p>Hola, <b>' + C.esc(me.name) + '</b></p><div><a class="btn dark sm" href="reservar.html">Nueva cita</a> <button type="button" class="btn sm" data-act="out">Salir</button></div></div>' +
       '<section class="panel"><h2>Próximas citas</h2>' + (up.length ? up.map(function (b) { return card(b, true); }).join("") : '<p class="empty">No tienes citas pendientes.</p>') + "</section>" +
       '<section class="panel"><h2>Historial</h2>' + (past.length ? past.map(function (b) { return card(b, false); }).join("") : '<p class="empty">Todavía no hay historial.</p>') + "</section>" +
-      '<section class="panel"><h2>Mis datos</h2><p><b>' + C.esc(me.name) + "</b><br>" + C.esc(me.email) + "<br>" + C.esc(me.phone || "Sin teléfono") + '</p><div class="actions"><button type="button" class="btn sm" data-act="profile">Editar datos</button><button type="button" class="btn sm" data-act="pass">Cambiar contraseña</button><button type="button" class="btn sm" data-act="export">Descargar mis datos</button></div>' +
+      '<section class="panel"><h2>Mis datos</h2><p><b>' + C.esc(me.name) + "</b><br>" + C.esc(me.email) + "<br>" + C.esc(me.phone || "Sin teléfono") + '</p><div class="actions"><button type="button" class="btn sm" data-act="profile">Editar datos</button>' + (me.demo ? "" : '<button type="button" class="btn sm" data-act="pass">Cambiar contraseña</button>') + '<button type="button" class="btn sm" data-act="export">Descargar mis datos</button></div>' +
       '<p class="fine">Para cancelar tu cuenta o ejercer otros derechos escribe a ' + C.esc(window.LUSTRO_CONFIG.clinic.email) + ".</p></section>";
   }
 

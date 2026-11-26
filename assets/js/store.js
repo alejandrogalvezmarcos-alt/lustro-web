@@ -30,7 +30,7 @@
         return cryptoObj.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: enc.encode(salt), iterations: 150000 }, k, 256);
       }).then(hex);
     }
-    function pub(u) { return u && { id: u.id, role: u.role, name: u.name, email: u.email, phone: u.phone, active: u.active, mustChange: u.mustChange, createdAt: u.createdAt }; }
+    function pub(u) { return u && { demo: !!u.demo, id: u.id, role: u.role, name: u.name, email: u.email, phone: u.phone, active: u.active, mustChange: u.mustChange, createdAt: u.createdAt }; }
     function current(db) {
       var s; try { s = JSON.parse(storage.getItem(SKEY)); } catch (e) { return null; }
       if (!s || s.exp < clock().getTime()) return null;
@@ -76,8 +76,54 @@
       });
     }
 
+    /* Usuarios de prueba: se crean en este navegador, con una contraseña aleatoria que nadie ve.
+       Se entra con un botón. Solo existen en modo demostración y se apagan con backend.demoAccess. */
+    var DEMO = {
+      admin: { name: "Administración de prueba", email: "demo-admin@ejemplo.test", phone: "600000100" },
+      paciente: { name: "Paciente de prueba", email: "demo-paciente@ejemplo.test", phone: "600000200" }
+    };
+    var demoAccess = !(cfg.backend && cfg.backend.demoAccess === false);
+    function ensureDemo(role) {
+      var d = DEMO[role], db = load(), u = findEmail(db, d.email);
+      if (u) {
+        if (u.role !== role || !u.demo) throw new Error("El correo de prueba ya está en uso en este navegador.");
+        u.active = true; u.mustChange = false; u.lockedUntil = 0; save(db); return Promise.resolve(u.id);
+      }
+      return newUser(db, d, role, tempPassword(), false).then(function (n) { var f = load(); find(f.users, n.id, "Cuenta").demo = true; save(f); return n.id; });
+    }
+    function demoPatientBookings(id) {
+      var db = load(), p = find(db.users, id, "Cuenta"), today = nowM().date;
+      if (db.bookings.some(function (b) { return b.patientId === id; })) return;
+      [[2, 1, "valoracion", "confirmada"], [8, 1, "nutricion", "pendiente"], [-7, -1, "salud-oral", "realizada"]].forEach(function (x) {
+        for (var off = x[0], n = 0; n < 30; off += x[1], n++) {
+          var day = C.addDays(today, off);
+          var free = C.availableSlots(day, x[2], activeBookings(db), db.blocks, cfg, { now: nowM(), anyTime: off < 0 });
+          if (!free.length) continue;
+          db.bookings.push({ id: uid(), code: code(), patientId: id, name: p.name, email: p.email, phone: p.phone, area: x[2], date: day, time: free[Math.floor(free.length / 2)],
+            duration: cfg.booking.slotMinutes, status: x[3], source: "ejemplo", professional: "", notes: "", adminNotes: "", consentAt: now(), createdAt: now(), updatedAt: now() });
+          break;
+        }
+      });
+      save(db);
+    }
+
     var api = {
       mode: "demo",
+      demoAccess: demoAccess,
+      demoLogin: async_(function (role) {
+        if (!demoAccess) throw new Error("El acceso de prueba está desactivado.");
+        if (!DEMO.hasOwnProperty(role)) throw new Error("Usuario de prueba no válido.");
+        var ids = {};
+        return ensureDemo("admin").then(function (a) { ids.admin = a; return ensureDemo("paciente"); }).then(function (p) {
+          ids.paciente = p;
+          session(find(load().users, ids.admin, "Cuenta"));
+          var hasSamples = load().bookings.some(function (b) { return b.source === "ejemplo" && b.patientId !== ids.paciente; });
+          return hasSamples ? null : api.seedDemo();
+        }).then(function () {
+          demoPatientBookings(ids.paciente);
+          var u = find(load().users, ids[role], "Cuenta"); session(u); return pub(u);
+        });
+      }),
       needsSetup: async_(function () { return !load().users.some(function (u) { return u.role === "admin"; }); }),
       setupAdmin: async_(function (d) {
         var db = load();

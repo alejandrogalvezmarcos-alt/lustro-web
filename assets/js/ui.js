@@ -78,7 +78,25 @@
   function demoRibbon(db) {
     return db.mode === "demo" ? '<div class="demo"><b>Modo demostración.</b> Los datos se guardan solo en este navegador y no llegan a la clínica. No introduzcas datos reales de pacientes.</div>' : "";
   }
+  function demoAccess(db) {
+    if (db.mode !== "demo" || !db.demoAccess) return "";
+    return '<div class="panel demo-in"><h2>Probar sin crear nada</h2><p>Entra con un usuario de prueba ya preparado, con citas de ejemplo. No hace falta contraseña.</p>' +
+      '<div class="actions"><button type="button" class="btn dark" data-demo="admin">Entrar como administración</button><button type="button" class="btn" data-demo="paciente">Entrar como paciente</button></div></div>';
+  }
+  function bindDemo(root, db) {
+    var buttons = root.querySelectorAll("[data-demo]");
+    Array.prototype.forEach.call(buttons, function (b) {
+      b.addEventListener("click", function () {
+        Array.prototype.forEach.call(buttons, function (x) { x.disabled = true; });
+        db.demoLogin(b.getAttribute("data-demo")).then(function (u) {
+          var page = u.role === "admin" ? "admin.html" : "mi-area.html";
+          if (location.pathname.slice(-page.length) === page) location.reload(); else location.href = page;
+        })
+          .catch(function (e) { Array.prototype.forEach.call(buttons, function (x) { x.disabled = false; }); toast(e.message, true); });
+      });
+    });
+  }
   function fail(root, e) { root.innerHTML = '<div class="panel"><p class="err">' + C.esc(e.message) + "</p></div>"; }
 
-  global.LustroUI = { areaName: areaName, badge: badge, options: options, field: field, data: data, toast: toast, modal: modal, confirm: confirmBox, bindSlots: bindSlots, download: download, ics: ics, demoRibbon: demoRibbon, fail: fail };
+  global.LustroUI = { demoAccess: demoAccess, bindDemo: bindDemo, areaName: areaName, badge: badge, options: options, field: field, data: data, toast: toast, modal: modal, confirm: confirmBox, bindSlots: bindSlots, download: download, ics: ics, demoRibbon: demoRibbon, fail: fail };
 })(this);

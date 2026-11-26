@@ -7,6 +7,8 @@
 .panel.soft{background:var(--tint)}
 .panel h2{font-size:28px;margin:0 0 16px}
 .panel.auth{max-width:520px}
+.demo-in{border-left:3px solid var(--accent)}
+.demo-in .actions{margin-top:14px}
 .two{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
 @media(max-width:820px){.two{grid-template-columns:1fr}}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}

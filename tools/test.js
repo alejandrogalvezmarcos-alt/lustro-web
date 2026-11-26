@@ -150,6 +150,30 @@ const booking = (o) => Object.assign({ name: "Persona Prueba", phone: "600111222
     await rejects(s.db.seedDemo(), /ya están/);
   });
 
+  await t("usuarios de prueba", async () => {
+    const s = make();
+    const a = await s.db.demoLogin("admin"); assert.strictEqual(a.role, "admin"); assert.ok(a.demo && !a.mustChange);
+    const all = await s.db.listBookings(), users = await s.db.listUsers();
+    assert.ok(all.length >= 15);
+    await s.db.signOut();
+    const p = await s.db.demoLogin("paciente"); assert.strictEqual(p.role, "paciente");
+    const mine = await s.db.listBookings();
+    assert.strictEqual(mine.length, 3); assert.ok(mine.every(b => b.patientId === p.id && !("adminNotes" in b)));
+    assert.strictEqual(mine.filter(b => C.isUpcoming(b, C.nowMadrid(NOW))).length, 2);
+    await rejects(s.db.listUsers(), /permiso/);
+    await s.db.demoLogin("admin");
+    assert.strictEqual((await s.db.listUsers()).length, users.length, "no duplica cuentas");
+    assert.strictEqual((await s.db.listBookings()).length, all.length, "no duplica citas");
+    await rejects(s.db.demoLogin("otro"), /no válido/);
+  });
+  await t("usuarios de prueba: no tocan cuentas propias y se pueden apagar", async () => {
+    const s = make(); await s.db.setupAdmin({ name: "Propia", email: "a@ejemplo.test", password: PW });
+    await s.db.signOut(); await s.db.demoLogin("paciente"); await s.db.signOut();
+    assert.strictEqual((await s.db.signIn("a@ejemplo.test", PW)).name, "Propia");
+    const off = createDemo(Object.assign({}, cfg, { backend: { demoAccess: false } }), areas, { storage: memory(), crypto: webcrypto, clock: () => NOW });
+    assert.strictEqual(off.demoAccess, false); await rejects(off.demoLogin("admin"), /desactivado/);
+  });
+
   const answers = (k) => { const a = { edad: "40", altura: "170", peso: "65", cintura: "75", moderada: "200", intensa: "0" }; S.STEPS.forEach(s => s.questions.forEach(q => { a[q.id] = k === "best" ? 0 : q.opts.reduce((w, o, i) => (o.pts < q.opts[w].pts ? i : w), 0); })); return a; };
   await t("calculadora: extremos", () => {
     const best = S.evaluate(answers("best")); assert.strictEqual(best.total, 100); assert.strictEqual(best.flags.length, 0);

@@ -22,7 +22,8 @@ window.LUSTRO_CONFIG = {
 
   /* Datos: "demo" guarda todo en el navegador (para probar).
      "supabase" usa una base de datos real. Ver supabase/LEEME.md */
-  backend: { provider: "demo", supabaseUrl: "", supabaseAnonKey: "" },
+  backend: { provider: "demo", supabaseUrl: "", supabaseAnonKey: "",
+             demoAccess: true },  // botones "Entrar como…" de prueba; solo en modo demostración. false = ocultarlos
 
   /* Se cargan SOLO si la persona acepta la categoría correspondiente. Vacío = no se carga nada. */
   analytics: { ga4: "", metaPixel: "" },

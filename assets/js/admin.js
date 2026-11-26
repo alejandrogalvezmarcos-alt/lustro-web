@@ -14,7 +14,8 @@
 
   /* ---------- acceso ---------- */
   function authForm(title, intro, fields, button, onSubmit) {
-    root.innerHTML = U.demoRibbon(db) + '<form class="panel auth" novalidate><h2>' + title + "</h2>" + intro + fields + '<p class="err" role="alert"></p><button class="btn dark" type="submit">' + button + "</button></form>";
+    root.innerHTML = U.demoRibbon(db) + U.demoAccess(db) + '<form class="panel auth" novalidate><h2>' + title + "</h2>" + intro + fields + '<p class="err" role="alert"></p><button class="btn dark" type="submit">' + button + "</button></form>";
+    U.bindDemo(root, db);
     var f = root.querySelector("form");
     f.addEventListener("submit", function (e) {
       e.preventDefault(); var b = f.querySelector("[type=submit]"); b.disabled = true; f.querySelector(".err").textContent = "";
